@@ -13,6 +13,15 @@ if [ -z "$platform" ]; then
   case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) platform=windows;; *) platform=linux;; esac
 fi
 
+# 깔기 전부터 있던 것 (과제가 준 것) 을 무엇을 만들기 전에 적어 둔다. 묶음 폴더와 .git 속은 뺀다
+skip="."
+case "$here" in "$PWD"/*) skip="./${here#"$PWD"/}";; esac
+before="$( (find . -mindepth 1 \( -name .git -o -path "$skip" \) -prune -o -print 2>/dev/null || true) | sed 's#^\./##' | LC_ALL=C sort |
+  while IFS= read -r p; do if [ -d "$p" ]; then printf '%s/\n' "$p"; else printf '%s\n' "$p"; fi; done)"
+if [ -d .git ]; then before="$(printf '.git/ (원래 git 저장소)\n%s' "$before")"; fi
+nb=0
+if [ -n "$before" ]; then nb=$(printf '%s\n' "$before" | wc -l | tr -d ' '); fi
+
 if [ -e AGENTS.md ]; then
   grep -q '^1 메인(main)은' AGENTS.md || { printf '\n' >> AGENTS.md; cat "$here/AGENTS.md" >> AGENTS.md; }
 else
@@ -23,6 +32,24 @@ for f in 합의문.md STATE.md 대화.md; do
 done
 mkdir -p main
 [ -e main/양식.md ] || cp "$here/main/양식.md" main/양식.md
+if [ -e main/처음_파일.md ]; then
+  seen="깔기 전부터 있던 것: 처음 깔 때의 기록 그대로 (main/처음_파일.md)"
+else
+  {
+    printf '# 깔기 전부터 있던 것 (과제가 준 것)\n\n'
+    printf '하네스를 깔기 직전에 이 폴더에 있던 것이다. 여기 없는 것은 하네스가 만들었다 (합의문.md, STATE.md, 대화.md, main/, research/, product/, verify/, .agents/, h, go 등). AGENTS.md 가 아래에 있으면 원래 있던 파일이고 하네스는 그 끝에 규칙을 더했다\n\n'
+    if [ "$nb" -eq 0 ]; then printf -- '- 없음 (빈 폴더)\n'; else printf '%s\n' "$before" | head -n 300 | sed 's/^/- /'; fi
+    if [ "$nb" -gt 300 ]; then printf -- '- (그 밖 %s개)\n' "$((nb - 300))"; fi
+  } > main/처음_파일.md
+  if [ "$nb" -eq 0 ]; then
+    seen="깔기 전부터 있던 것: 없음 (빈 폴더)"
+  else
+    top="$(printf '%s\n' "$before" | grep -v '/[^ ]' | head -n 12 | tr '\n' ' ' || true)"
+    ntop=$(printf '%s\n' "$before" | grep -vc '/[^ ]' || true)
+    if [ "$ntop" -gt 12 ]; then top="$top…"; fi
+    seen="깔기 전부터 있던 것 ${nb}개 (과제가 준 것, 목록은 main/처음_파일.md): $top"
+  fi
+fi
 for p in $roles; do
   mkdir -p "main/delivery/$p/in_" "main/delivery/$p/out_" "$p/delivery/main/in_" "$p/delivery/main/out_"
   [ -e "$p/AGENTS.md" ] || sed "s/{역할}/$p/g" "$here/역할_AGENTS.md" > "$p/AGENTS.md"
@@ -79,4 +106,5 @@ if [ "$platform" = windows ]; then hcmd=.harness/h; fi
 first="$(bash "$hcmd" commit 하네스 깔기 2>/dev/null || true)"
 
 echo "하네스 준비 끝: AGENTS.md (열세 줄), 합의문.md, STATE.md, 대화.md, main/양식.md, 세션 폴더 셋의 AGENTS.md, 폴더 스물여섯, $skl, 명령 h. $guard. ${first:+$first. }있던 파일은 그대로 (AGENTS.md 는 끝에 더함)"
+echo "$seen"
 echo "$next"
