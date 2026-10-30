@@ -2,7 +2,7 @@
 # Codex 세션 넷 하네스를 현재 폴더에 깐다. 있는 파일은 덮어쓰지 않는다.
 # AGENTS.md 가 이미 있으면 (플랫폼의 지침) 끝에 열세 줄을 더한다. README.md 는 만들지 않는다
 # (작업 폴더의 README.md 는 과제 안내일 수 있다. 제출 문서는 규칙 6 의 보고서.md).
-# 세션 폴더마다 AGENTS.md (역할), 스킬 아홉은 .agents/skills/, 명령 h (전달문과 보고, 현황, 자동 검토) 와 go (세션 열기, 모두 yolo) 는 루트에.
+# 세션 폴더마다 AGENTS.md (역할), 스킬 아홉은 묶음의 skills/ 에서 .agents/skills/ 로 (웹 올리기는 점으로 시작하는 폴더를 빼서 묶음에는 skills/), 명령 h (전달문과 보고, 현황, 자동 검토) 와 go (세션 열기, 모두 yolo) 는 루트에.
 # 작업 폴더가 git 저장소면 push 를 막는 설정을 넣는다 (push 는 쓰지 않는다. .git 은 Codex 가 고칠 수 없다).
 # 쓰는 법: git clone <이 저장소> _h && bash _h/setup.sh && rm -rf _h
 set -e
@@ -28,10 +28,14 @@ for p in $roles; do
   [ -e "$p/AGENTS.md" ] || sed "s/{역할}/$p/g" "$here/역할_AGENTS.md" > "$p/AGENTS.md"
 done
 mkdir -p .agents/skills
-for s in "$here"/.agents/skills/*/; do
+for s in "$here"/skills/*/ "$here"/.agents/skills/*/; do
+  [ -f "$s/SKILL.md" ] || continue
   n="$(basename "$s")"
   [ -e ".agents/skills/$n/SKILL.md" ] || { mkdir -p ".agents/skills/$n"; cp "$s/SKILL.md" ".agents/skills/$n/SKILL.md"; }
 done
+nsk=0
+for f in .agents/skills/*/SKILL.md; do if [ -f "$f" ]; then nsk=$((nsk + 1)); fi; done
+case "$nsk" in 9) skl="스킬 아홉 (.agents/skills)";; 0) skl="스킬 없음 (묶음에 skills/ 가 없다)";; *) skl="스킬 ${nsk}개 (.agents/skills)";; esac
 
 # 명령: Linux 는 루트에 h 와 go. Windows 는 Codex 가 PowerShell 로 돌리니 h.cmd 가 Git Bash 로 h 를 부른다
 if [ "$platform" = windows ]; then
@@ -74,5 +78,5 @@ hcmd=./h
 if [ "$platform" = windows ]; then hcmd=.harness/h; fi
 first="$(bash "$hcmd" commit 하네스 깔기 2>/dev/null || true)"
 
-echo "하네스 준비 끝: AGENTS.md (열세 줄), 합의문.md, STATE.md, 대화.md, main/양식.md, 세션 폴더 셋의 AGENTS.md, 폴더 스물여섯, 스킬 아홉 (.agents/skills), 명령 h. $guard. ${first:+$first. }있던 파일은 그대로 (AGENTS.md 는 끝에 더함)"
+echo "하네스 준비 끝: AGENTS.md (열세 줄), 합의문.md, STATE.md, 대화.md, main/양식.md, 세션 폴더 셋의 AGENTS.md, 폴더 스물여섯, $skl, 명령 h. $guard. ${first:+$first. }있던 파일은 그대로 (AGENTS.md 는 끝에 더함)"
 echo "$next"
