@@ -1,0 +1,64 @@
+/* 색, 글꼴, 로고 자리는 이 파일 하나. 「회사 스타일로」 는 아래 변수만 바꾼다 (research 의 자산.md 에서) */
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --ink: #1f2430;
+  --muted: #6b7280;
+  --line: #d9dde3;
+  --accent: #e4572e;        /* 강조색 하나 */
+  --accent-ink: #ffffff;
+  --error: #b42318;
+  --ok: #1f7a4d;
+  --font: "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --logo-text: "SERVICE";
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+main { max-width: 960px; margin: 0 auto; padding: 16px; }
+
+.top { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--line); }
+.logo { font-weight: 800; letter-spacing: .08em; color: var(--accent); font-size: 18px; min-width: 96px; }
+.who { margin-left: auto; color: var(--muted); }
+
+h1, h2 { margin: 0 0 12px; font-weight: 700; }
+h1 { font-size: 20px; } h2 { font-size: 17px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; max-width: 420px; margin: 24px auto; }
+.panel { background: var(--card); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 10px 10px; padding: 16px; }
+.note { color: var(--muted); font-size: 13px; }
+.hidden { display: none !important; }
+
+/* 단추: 최소 크기와 간격을 지켜 겹치지 않게 */
+button { min-height: 36px; min-width: 72px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font: inherit; cursor: pointer; }
+button:hover { filter: brightness(.95); }
+button.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+form { display: flex; flex-direction: column; gap: 8px; }
+form.row { flex-direction: row; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+input, select { min-height: 36px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; color: var(--ink); background: var(--card); }
+/* 비밀번호 칸: type=password 대신 글자만 가린다 (브라우저의 비밀번호 저장 창을 띄우지 않게) */
+input.secret { -webkit-text-security: disc; }
+
+/* 탭: 좁은 창에서는 줄을 바꾼다 (겹침 없음) */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 8px 0; background: var(--card); border: 1px solid var(--line); border-bottom: 0; border-radius: 10px 10px 0 0; }
+.tabs button { background: transparent; color: var(--muted); border: 1px solid transparent; border-bottom: 2px solid transparent; border-radius: 8px 8px 0 0; }
+.tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+pre { background: #f0f2f5; border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow: auto; max-height: 360px; white-space: pre-wrap; }
+.errors { color: var(--error); padding-left: 20px; }
+.error { color: var(--error); }
+.status { color: var(--muted); }
+.busy { position: fixed; right: 16px; bottom: 16px; background: var(--ink); color: #fff; padding: 8px 12px; border-radius: 8px; }
+.toast { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); background: var(--ok); color: #fff; padding: 8px 14px; border-radius: 8px; }
+.toast.error { background: var(--error); }
+
+@media (max-width: 800px) {
+  main { padding: 12px; }
+  .card { margin: 12px auto; }
+  .row, form.row { flex-direction: column; align-items: stretch; }
+  .tabs button { flex: 1 1 45%; }
+}

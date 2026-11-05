@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>데이터 서비스</title>
+<link rel="stylesheet" href="static/theme.css">
+</head>
+<body>
+<header class="top">
+  <div class="logo" id="logo">SERVICE</div>
+  <div class="who" id="who"></div>
+  <button id="logout" class="ghost hidden" type="button">로그아웃</button>
+</header>
+
+<main>
+  <section id="login" class="card">
+    <h1>로그인</h1>
+    <form id="login-form" method="post" autocomplete="off">
+      <!-- 비밀번호 칸은 type=password 를 쓰지 않는다: 브라우저의 비밀번호 저장 창이 뜨면 전체 화면이 풀린다. 글자는 theme.css 의 .secret 이 가린다 -->
+      <label>아이디 <input name="account" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>
+      <label>비밀번호 <input name="secret" type="text" class="secret" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>
+      <button type="submit">들어가기</button>
+    </form>
+    <p class="note">운영자와 일반 계정은 env.example 의 비밀번호로 들어간다</p>
+    <p id="login-error" class="error"></p>
+  </section>
+
+  <section id="operator" class="hidden">
+    <nav class="tabs" role="tablist">
+      <button type="button" data-tab="datasets" class="active">데이터셋</button>
+      <button type="button" data-tab="params">조건과 재계산</button>
+      <button type="button" data-tab="results">결과</button>
+      <button type="button" data-tab="export">내보내기</button>
+    </nav>
+    <div class="panel" id="tab-datasets">
+      <h2>데이터셋 선택, 검증, 적용</h2>
+      <p>현재 적용: <strong id="ds-current">-</strong></p>
+      <div class="row">
+        <select id="ds-select"></select>
+        <button type="button" id="ds-validate">검증</button>
+        <button type="button" id="ds-apply">적용</button>
+      </div>
+      <ul id="ds-errors" class="errors"></ul>
+      <p id="ds-msg" class="status"></p>
+    </div>
+    <div class="panel hidden" id="tab-params">
+      <h2>운영 조건</h2>
+      <form id="params-form" class="row">
+        <label>정원 <input name="capacity" type="number" min="1"></label>
+        <label>여유 (분) <input name="margin_minutes" type="number" min="0"></label>
+        <button type="submit">저장하고 다시 계산</button>
+      </form>
+      <p id="params-msg" class="status"></p>
+    </div>
+    <div class="panel hidden" id="tab-results">
+      <h2>결과</h2>
+      <p id="results-empty" class="status">아직 결과가 없다. 「조건과 재계산」 에서 계산한다</p>
+      <pre id="results-body" class="hidden"></pre>
+    </div>
+    <div class="panel hidden" id="tab-export">
+      <h2>내보내기 (JSON)</h2>
+      <p class="note">파일 창을 열지 않는다. 아래 글을 복사한다</p>
+      <button type="button" id="export-load">불러오기</button>
+      <button type="button" id="export-copy">복사</button>
+      <pre id="export-body"></pre>
+    </div>
+  </section>
+
+  <section id="member" class="hidden">
+    <nav class="tabs" role="tablist">
+      <button type="button" data-tab="mine" class="active">내 항목</button>
+      <button type="button" data-tab="settings">설정</button>
+    </nav>
+    <div class="panel" id="tab-mine">
+      <h2>항목</h2>
+      <p id="items-empty" class="status hidden">항목이 없다</p>
+      <table id="items-table"><thead><tr><th>번호</th><th>이름</th><th>상태</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="panel hidden" id="tab-settings">
+      <h2>설정</h2>
+      <p class="note">개인 설정 자리 (과제에 맞춰 칸을 더한다)</p>
+      <form id="member-settings"><label>표시 이름 <input name="display" maxlength="40"></label><button type="submit">저장</button></form>
+      <p id="member-settings-msg" class="status"></p>
+    </div>
+  </section>
+
+  <p id="busy" class="busy hidden">기다리는 중…</p>
+  <p id="toast" class="toast hidden"></p>
+</main>
+<script src="static/app.js"></script>
+</body>
+</html>

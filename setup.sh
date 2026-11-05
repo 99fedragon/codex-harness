@@ -2,7 +2,7 @@
 # Codex 세션 넷 하네스를 현재 폴더에 깐다. 있는 파일은 덮어쓰지 않는다.
 # AGENTS.md 가 이미 있으면 (플랫폼의 지침) 끝에 열세 줄을 더한다. README.md 는 만들지 않는다
 # (작업 폴더의 README.md 는 과제 안내일 수 있다. 제출 문서는 규칙 6 의 보고서.md).
-# 세션 폴더마다 AGENTS.md (역할), 스킬 아홉은 묶음의 skills/ 에서 .agents/skills/ 로 (웹 올리기는 점으로 시작하는 폴더를 빼서 묶음에는 skills/), 명령 h (전달문과 보고, 현황, 자동 검토) 와 go (세션 열기, 모두 yolo) 는 루트에.
+# 세션 폴더마다 AGENTS.md (역할), 스킬 열둘은 묶음의 skills/ 에서 .agents/skills/ 로 (웹 올리기는 점으로 시작하는 폴더를 빼서 묶음에는 skills/), 명령 h (전달문과 보고, 현황, 자동 검토) 와 go (세션 열기, 모두 yolo) 는 루트에.
 # 작업 폴더가 git 저장소면 push 를 막는 설정을 넣는다 (push 는 쓰지 않는다. .git 은 Codex 가 고칠 수 없다).
 # 쓰는 법: git clone <이 저장소> _h && bash _h/setup.sh && rm -rf _h
 set -e
@@ -27,11 +27,19 @@ if [ -e AGENTS.md ]; then
 else
   cp "$here/AGENTS.md" AGENTS.md
 fi
-for f in 합의문.md STATE.md 대화.md; do
+for f in 합의문.md STATE.md 대화.md 요구.md 결정.md 피드백.md 설명.md; do
   [ -e "$f" ] || cp "$here/$f" "$f"
 done
 mkdir -p main
 [ -e main/양식.md ] || cp "$here/main/양식.md" main/양식.md
+[ -e main/역할_팀원_AGENTS.md ] || cp "$here/역할_팀원_AGENTS.md" main/역할_팀원_AGENTS.md  # h team 이 팀원 폴더를 만들 때 쓴다
+# 데이터 서비스 뼈대: 과제가 웹이면 product 가 product/app 으로 복사해 시작한다. 아니면 그대로 둔다 (과제 풀이 코드가 아니다)
+if [ -d "$here/skeleton/webapp" ] && [ ! -d main/skeleton/webapp ]; then
+  mkdir -p main/skeleton && cp -r "$here/skeleton/webapp" main/skeleton/webapp
+  skel="뼈대 (main/skeleton/webapp)"
+else
+  skel="뼈대 없음"
+fi
 if [ -e main/처음_파일.md ]; then
   seen="깔기 전부터 있던 것: 처음 깔 때의 기록 그대로 (main/처음_파일.md)"
 else
@@ -62,7 +70,7 @@ for s in "$here"/skills/*/ "$here"/.agents/skills/*/; do
 done
 nsk=0
 for f in .agents/skills/*/SKILL.md; do if [ -f "$f" ]; then nsk=$((nsk + 1)); fi; done
-case "$nsk" in 9) skl="스킬 아홉 (.agents/skills)";; 0) skl="스킬 없음 (묶음에 skills/ 가 없다)";; *) skl="스킬 ${nsk}개 (.agents/skills)";; esac
+case "$nsk" in 12) skl="스킬 열둘 (.agents/skills)";; 0) skl="스킬 없음 (묶음에 skills/ 가 없다)";; *) skl="스킬 ${nsk}개 (.agents/skills)";; esac
 
 # 명령: Linux 는 루트에 h 와 go. Windows 는 Codex 가 PowerShell 로 돌리니 h.cmd 가 Git Bash 로 h 를 부른다
 if [ "$platform" = windows ]; then
@@ -105,6 +113,6 @@ hcmd=./h
 if [ "$platform" = windows ]; then hcmd=.harness/h; fi
 first="$(bash "$hcmd" commit 하네스 깔기 2>/dev/null || true)"
 
-echo "하네스 준비 끝: AGENTS.md (열세 줄), 합의문.md, STATE.md, 대화.md, main/양식.md, 세션 폴더 셋의 AGENTS.md, 폴더 스물여섯, $skl, 명령 h. $guard. ${first:+$first. }있던 파일은 그대로 (AGENTS.md 는 끝에 더함)"
+echo "하네스 준비 끝: AGENTS.md (열세 줄), 합의문.md, STATE.md, 대화.md, 기록 넷 (요구, 결정, 피드백, 설명), main/양식.md, 팀장 폴더 셋의 AGENTS.md (팀원은 팀장이 보낼 때 생긴다), 폴더 스물여섯, $skl, $skel, 명령 h. $guard. ${first:+$first. }있던 파일은 그대로 (AGENTS.md 는 끝에 더함)"
 echo "$seen"
 echo "$next"
