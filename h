@@ -655,7 +655,7 @@ cmd_review_worker() {  # h _review <세션> <번호>: 자동 검토를 끝까지
     if ! command -v "$codex" >/dev/null 2>&1; then
       verdict="검토 실패 (codex 명령 없음)"
     else
-      model_args "${HARNESS_REVIEW_EFFORT:-high}"  # 검토는 6.1 Sol high
+      model_args "${HARNESS_REVIEW_EFFORT:-medium}"  # 검토는 6.1 Sol medium (읽기만 하는 판정. 더 깊게는 HARNESS_REVIEW_EFFORT=high)
       set -- exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check ${MODEL_ARGS[@]+"${MODEL_ARGS[@]}"} \
         -C "$ROOT/verify" -o "$last" "$(review_prompt "$who" "$n" "$inf" "$rep")"
       if command -v timeout >/dev/null 2>&1; then
