@@ -13,10 +13,10 @@ if [ -z "$platform" ]; then
   case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) platform=windows;; *) platform=linux;; esac
 fi
 
-# 깔기 전부터 있던 것 (과제가 준 것) 을 무엇을 만들기 전에 적어 둔다. 묶음 폴더와 .git 속은 뺀다
+# 깔기 전부터 있던 것 (과제가 준 것) 을 무엇을 만들기 전에 적어 둔다. 묶음 폴더와 .git 속, 루트의 점 폴더 (환경의 .codex .cache .npm. 작업 폴더가 홈이면 수천 개) 는 뺀다. 점 파일 (.gitignore) 은 적는다
 skip="."
 case "$here" in "$PWD"/*) skip="./${here#"$PWD"/}";; esac
-before="$( (find . -mindepth 1 \( -name .git -o -path "$skip" \) -prune -o -print 2>/dev/null || true) | sed 's#^\./##' | LC_ALL=C sort |
+before="$( (find . -mindepth 1 \( -name .git -o -path "$skip" -o \( -type d -path './.*' \) \) -prune -o -print 2>/dev/null || true) | sed 's#^\./##' | LC_ALL=C sort |
   while IFS= read -r p; do if [ -d "$p" ]; then printf '%s/\n' "$p"; else printf '%s\n' "$p"; fi; done)"
 if [ -d .git ]; then before="$(printf '.git/ (원래 git 저장소)\n%s' "$before")"; fi
 nb=0
@@ -45,7 +45,7 @@ if [ -e main/처음_파일.md ]; then
 else
   {
     printf '# 깔기 전부터 있던 것 (과제가 준 것)\n\n'
-    printf '하네스를 깔기 직전에 이 폴더에 있던 것이다. 여기 없는 것은 하네스가 만들었다 (합의문.md, STATE.md, 대화.md, main/, research/, product/, verify/, .agents/, h, go 등). AGENTS.md 가 아래에 있으면 원래 있던 파일이고 하네스는 그 끝에 규칙을 더했다\n\n'
+    printf '하네스를 깔기 직전에 이 폴더에 있던 것이다. 여기 없는 것은 하네스가 만들었다 (합의문.md, STATE.md, 대화.md, main/, research/, product/, verify/, .agents/, h, go 등). AGENTS.md 가 아래에 있으면 원래 있던 파일이고 하네스는 그 끝에 규칙을 더했다. 점으로 시작하는 폴더 (.codex, .cache 같은 환경의 것) 는 적지 않았다\n\n'
     if [ "$nb" -eq 0 ]; then printf -- '- 없음 (빈 폴더)\n'; else printf '%s\n' "$before" | head -n 300 | sed 's/^/- /'; fi
     if [ "$nb" -gt 300 ]; then printf -- '- (그 밖 %s개)\n' "$((nb - 300))"; fi
   } > main/처음_파일.md

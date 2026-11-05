@@ -88,6 +88,9 @@ commit_all() {  # 메시지 → 작업 폴더를 커밋한다 (git 저장소일 
   mkdir -p "$(dirname "$ex")" 2>/dev/null || true
   pre="$(git -C "$ROOT" rev-parse --show-prefix 2>/dev/null)"
   grep -qxF '.h/' "$ex" 2>/dev/null || printf '%s\n' '.h/' >> "$ex"
+  for pat in '/.*/' '!/.agents/'; do  # 루트의 점 폴더 (환경의 .codex .cache .npm) 는 커밋하지 않는다. 우리 스킬 자리 .agents/ 만 둔다 (작업 폴더가 홈 폴더일 때 수천 개가 섞인다). 점 파일 (.gitignore) 은 그대로
+    grep -qxF "$pat" "$ex" 2>/dev/null || printf '%s\n' "$pat" >> "$ex"
+  done
   for pat in '*.db' '*.sqlite' '*.sqlite3' '.tmp_tests/'; do  # 비밀값이 든 DB 와 시험 임시 자료는 커밋하지 않는다
     grep -qxF "$pat" "$ex" 2>/dev/null || printf '%s\n' "$pat" >> "$ex"
   done
@@ -412,10 +415,11 @@ TAB="$(printf '\t')"
 WRITE_RE='Add-Content|Set-Content|Out-File|AppendAll|WriteAll|New-Item|Copy-Item|Move-Item|Remove-Item|Rename-Item|apply_patch|[*]{3} (Update|Add|Delete) File|>>|> *[.][.][/\\]|(^|[^[:alnum:]_-])(cp|mv|rm|touch|tee|truncate) |sed -i|[.]write[(]|write_text|to_csv|to_excel|savefig'
 snapshot() {  # 세션 → 그 세션 폴더 밖의 파일 목록 (상대 경로 TAB 바뀐 때 TAB 크기), 정렬. find 가 -printf 를 못 쓰면 「#목록실패」 한 줄
   # 팀장의 팀원 폴더 (세션_숫자) 도 뺀다: 팀원은 팀장의 일을 받아 자기 폴더에 쓰고, 팀장은 그것을 읽어 모은다
+  # 루트의 점 폴더 (환경의 .codex .cache .npm) 도 뺀다. Codex 기록은 턴마다 바뀌어 밖 변경으로 잡히면 잡음이다. 우리 스킬 자리 .agents/ 만 본다. 점 파일은 그대로
   local t st
   t="$(mktemp 2>/dev/null || printf '%s' "$ROOT/.h_snap.$$")"
   ( cd "$ROOT" && "${HARNESS_FIND:-find}" . \( -path "./$1" -o -path "./${1}_[0-9]" -o -path "./${1}_[0-9][0-9]" -o -name .git -o -name node_modules -o -name __pycache__ -o -name .venv \
-      -o -name venv -o -name .h -o -path './verify/검토*' \) -prune -o -type f \
+      -o -name venv -o -name .h -o -path './verify/검토*' -o \( -type d -path './.*' ! -path './.agents' ! -path './.agents/*' \) \) -prune -o -type f \
       ! -path './verify/delivery/main/out_/검토*' ! -path './verify/delivery/main/out_/.검토*' ! -name .h_review_off ! -name '.h_snap.*' \
       -printf '%P\t%T@\t%s\n' 2>/dev/null ) > "$t"
   st=$?
